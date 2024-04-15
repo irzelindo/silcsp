@@ -1,0 +1,373 @@
+<?php
+@Header( "Content-type: text/html; charset=UTF-8" );
+session_start();
+
+include( "conexion.php" );
+$link = Conectarse();
+
+$nomyape = $_SESSION[ "nomyape" ];
+$codusu = $_SESSION[ 'codusu' ];
+
+$elusuario = $nomyape;
+
+$v_162 = $_SESSION['V_162'];
+
+$nordentra 	 = $_GET['nordentra'];
+$codservicio = $_GET['codservicio'];
+$codestudio  = $_GET['codestudio'];
+$tipo        = $_GET['tipo'];
+
+$fechaimp = date("d/m/Y", time());
+$fechaimpg = date("Y-m-d", time());
+$horaimp  = date("H:i");
+
+$query = "SELECT * FROM establecimientos WHERE codservicio = '$codservicio'";
+$result = pg_query($link,$query);
+
+$row = pg_fetch_assoc($result);
+
+$nomservicio = $row["nomservicio"];
+
+$query1 = "SELECT * FROM ordtrabajo WHERE nordentra = '$nordentra'";
+$result1 = pg_query($link,$query1);
+
+$row1 = pg_fetch_assoc($result1);
+
+$nropaciente = $row1["nropaciente"];
+$fecharec 	 = date("d/m/Y", strtotime($row1["fecharec"]));
+$horarec     = $row1["horarec"];
+$codservder  = $row1["codservder"];
+
+$queryder = "SELECT * FROM establecimientos WHERE codservicio = '$codservder'";
+$resultder = pg_query($link,$queryder);
+
+$rowder = pg_fetch_assoc($resultder);
+
+$nomservicioder = $rowder["nomservicio"];
+
+$query2 = "SELECT * FROM paciente WHERE nropaciente = '$nropaciente'";
+$result2 = pg_query($link,$query2);
+
+$row2 = pg_fetch_assoc($result2);
+
+$pnombre 	= $row2["pnombre"];
+$snombre 	= $row2["snombre"];
+$papellido 	= $row2["papellido"];
+$sapellido 	= $row2["sapellido"];
+$cedula 	= $row2["cedula"];
+$tdocumento = $row2["tdocumento"];
+$telefono 	= $row2["telefono"];
+$sexo1   	= $row2["sexo"];
+$fechanac   = $row2["fechanac"];
+
+$fecha1 = explode("-",$fechanac); // fecha nacimiento
+$fecha2 = explode("-",date("Y-m-d")); // fecha actual
+
+/*$edad = $fecha2[0]-$fecha1[0];
+
+if($fecha2[1]<=$fecha1[1] and $fecha2[2]<=$fecha1[2])
+{
+	$edad = $edad - 1;
+}*/
+
+if($row2["edada"] != 0)
+{
+	$edad = $row2["edada"];
+}
+else
+{
+	$edad = $row2["edadm"];
+}
+
+switch ($tdocumento) {
+    case '1':
+        $nomdocumento = "Cedula";
+        break;
+    case '2':
+        $nomdocumento = "Pasaporte";
+        break;
+    case '3':
+        $nomdocumento = "Carnet Indigena";
+        break;
+	case '4':
+        $nomdocumento = "Otros";
+        break;
+	case '5':
+        $nomdocumento = "No Tiene";
+        break;
+}
+
+
+if($row2["sexo"] == 1)
+{
+	$sexo  = "Masculino";
+}
+else
+{
+	$sexo  = "Femenino";
+}
+
+$query3 = "select distinct codsector,codusu1
+			from  resultados r
+			where r.nordentra   = '$nordentra'
+			and   r.fechaval is not null
+			and   (r.codresultado !=''
+					or   r.resultado !=''
+				   )
+			order by codsector";
+$result3 = pg_query($link,$query3);
+$countlc= pg_num_rows($result3);
+
+function acentos($cadena)
+{
+   $search = explode(",","Ã,á,é,í,ó,ú,ñ,Á,É,Í,Ó,Ú,Ñ,Ã¡,Ã©,Ã­,Ã³,Ãº,Ã±,ÃÃ¡,ÃÃ©,ÃÃ­,ÃÃ³,ÃÃº,ÃÃ±,Ã“,Ã ,Ã‰,Ã ,Ãš,â€œ,â€ ,Â¿,Ã‘,Ã,ü,Ã‘");
+   $replace = explode(",","Í,á,é,í,ó,ú,ñ,Á,É,Í,Ó,Ú,Ñ,á,é,í,ó,ú,ñ,Á,É,Í,Ó,Ú,Ñ,Ó,Á,É,Í,Ú,\",\",¿,Ñ,Á,&uuml;,Ñ");
+   $cadena= str_replace($search, $replace, $cadena);
+
+   return $cadena;
+}
+
+
+if ( $_SESSION[ 'usuario' ] != "SI" ) {
+	header( "Location: index.php" );
+}
+
+?>
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Sistema de Informaci&oacute;n del Laboratorio de Salud P&uacute;blica</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="shortcut icon" href="favicon.ico"/>
+<!------------ CSS ----------->
+<link href="css/bootstrap2.min.css" rel="stylesheet"/>
+
+
+
+<script type="text/javascript" src="js/JsBarcode.all.min.js"></script>
+
+<!----------- PARA ALERTAS  ---------->
+<script src="js/sweetalert2.all.min.js" type="text/javascript"></script>
+<style>
+
+@page {size: A4 portrait;}
+
+tr.salto {page-break-after:always !important;}
+
+footer {
+  background-color: black;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+  color: white;
+  text-align: center;
+  border-top: solid 1px;
+}
+</style>
+</head>
+<body>
+	<?php
+	if($countlc != 0)
+	{ ?>
+		<table>
+			<tbody>
+				<tr>
+					<td>
+						<table width="886" border="0" align="center">
+							<thead style="display: table-header-group">
+								<tr style="border-bottom: solid 1px; border-top: solid 1px;" align="center">
+									<td colspan="4" style="padding-bottom: 13px; padding-top: 13px;">
+										<img src="images/logo-msp-labo.fw.png" style="width: 600px; align='center'; height: 85px">
+									</td>
+								</tr>
+								<tr style="font-size: 12px;">
+								  <td style="padding-top: 12px;padding-left: 20px;"><b>Orden:</b></td>
+								  <td style="padding-top: 12px;"><?php echo $nordentra; ?></td>
+								  <td style="padding-top: 12px;"><b>Servicio: </b></td>
+								  <td style="padding-top: 12px;"><?php echo $nomservicio; ?></td>
+								</tr>
+
+								<tr style="font-size: 12px;">
+								  <td style="padding-left: 20px;"><b>Tipo de documento:</b></td>
+								  <td><?php echo $nomdocumento." ".$cedula; ?></td>
+								  <td><b>Derivante:</b> </td>
+								  <td><?php echo $nomservicioder; ?></td>
+								</tr>
+
+								<tr style="font-size: 12px;">
+								  <td style="padding-left: 20px;"><b>Apellidos y Nombres:</b></td>
+								  <td colspan="3"><?php echo $papellido." ".$sapellido." ".$pnombre." ".$snombre; ?></td>
+								</tr>
+
+								<tr style="font-size: 12px;">
+								  <td style="padding-left: 20px;"><b>Sexo:</b> </td>
+								  <td><?php echo $sexo; ?></td>
+								  <td><b>Edad:</b> </td>
+								  <td><?php echo $edad; ?></td>
+								</tr>
+
+								<tr style="font-size: 12px;">
+								  <td style="padding-left: 20px;"><b>Tel&eacute;fono:</b></td>
+								  <td><?php echo $telefono; ?></td>
+								  <td><b>Fecha Ing.:</b> </td>
+								  <td><?php echo $fecharec." ".$horarec; ?></td>
+								</tr>
+
+								<tr style="font-size: 10px;border-bottom: solid 1px;">
+								  <td style="padding-bottom: 13px;padding-left: 20px;">Imprimio:</td>
+								  <td style="padding-bottom: 13px;"><?php echo $codusu; ?> </td>
+								  <td style="padding-bottom: 13px;">Fecha Impresion:</td>
+								  <td style="padding-bottom: 13px;"><?php echo $fechaimp." ".$horaimp; ?></td>
+								</tr>
+
+								<tr>
+								  <td colspan="4">&nbsp;</td>
+								</tr>
+								<tr>
+									<td>&nbsp;</td>
+								  <td colspan="2" align="center"><strong><?php echo ($tipo == "TIPI"?"Tipificaci&oacute;n de HLA":"Anticuerpos"); ?></strong></td>
+									<td>&nbsp;</td>
+								</tr>
+								<tr>
+								  <td colspan="4"><strong>Nombre del estudio: Tipificacion de HLA</strong></td>
+								</tr>
+								<tr>
+								  <td colspan="4"><strong>Metodo:</strong> PCR-SSO (polymerase chain reaction-sequence specific oligonucleotide probe)</strong></td>
+								</tr>
+								<tr>
+								  <td colspan="4"><strong>M&eacute;todo de Extracci&oacute;n de ADN:</strong> Extracción y purificación de ADN con columnas de sílice. </td>
+								</tr>
+								<tr> 
+								  <td colspan="4"><strong>Material:</strong> Sangre</td>
+								</tr>
+								<tr style="font-size: 12px;border-bottom: solid 1px;">
+								  <td colspan="4">&nbsp;</td>
+								</tr>
+								
+								<tr>
+									<th>Locus:</th>
+									<th>Tipificaci&oacute;n:</th>
+									<th colspan="2">Equivalente Serol&oacute;gico</th>
+								</tr>
+								
+								<tr>
+									<th>A</th>
+									<th>11:EKWDA</th>
+									<th colspan="2">&nbsp;</th>
+								</tr>
+								<tr>
+									<th>B</th>
+									<th>30:ENHGK</th>
+									<th colspan="2">&nbsp;</th>
+								</tr>
+								
+								<tr style="font-size: 12px;border-bottom: solid 1px;">
+								  <td colspan="4">&nbsp;</td>
+								</tr>
+								
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								<tr> 
+								  <td colspan="4"><strong>Interprborraretaci&oacute;n de C&oacute;digo NMDP:</strong></td>
+								</tr>
+								<tr>
+									<td colspan="4"><strong>EKWDA=</strong>:03:01/03:197/03:284N/03:289/03:290/03:291/03:292/03:293/03:300/03:301/03:302/03:310/03:312/03:313/03:315/03:323 N/03:325/03:329N/03:331/03:335N/03:336N/03:337N/03:338/03:339/03:340/03:341/03:342N/03:344/03:346/03:350/03:351/03:352/03:357N/03:358/03:359/03:362/03:363/03:367/03:369/03:372/03:374N/03:375/03:376/03:380/03:383/03:386/03:387/03:38 8Q/03:391/03:392/03:393/03:399/03:401/03:402N/03:404N/03:408N/03:410/03:411/03:412/03:415/03:418/03:419/03:420/03:42 1/03:423/03:424/03:425/03:426/03:430/03:431/03:433/03:434/03:435/03:436/03:437Q/03:439/03:441/03:444/03:445/03:446 XX2:=:29:01/29:02/29:100/29:109/29:119/29:120/29:121/29:126Q/29:131/29:134/29:135/29:137/29:140/29:146/29:148/29:149</td>
+								</tr>
+								
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								<tr>
+									<td colspan="4"><strong>ENHGK=</strong>:03:01/03:197/03:284N/03:289/03:290/03:291/03:292/03:293/03:300/03:301/03:302/03:310/03:312/03:313/03:315/03:323 N/03:325/03:329N/03:331/03:335N/03:336N/03:337N/03:338/03:339/03:340/03:341/03:342N/03:344/03:346/03:350/03:351/03:352/03:357N/03:358/03:359/03:362/03:363/03:367/03:369/03:372/03:374N/03:375/03:376/03:380/03:383/03:386/03:387/03:38 8Q/03:391/03:392/03:393/03:399/03:401/03:402N/03:404N/03:408N/03:410/03:411/03:412/03:415/03:418/03:419/03:420/03:42 1/03:423/03:424/03:425/03:426/03:430/03:431/03:433/03:434/03:435/03:436/03:437Q/03:439/03:441/03:444/03:445/03:446 XX2:=:29:01/29:02/29:100/29:109/29:119/29:120/29:121/29:126Q/29:131/29:134/29:135/29:137/29:140/29:146/29:148/29:149</td>
+								</tr>
+								
+								<tr style="font-size: 12px;border-bottom: solid 1px;">
+								  <td colspan="4">&nbsp;</td>
+								</tr> 
+								
+								
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								<tr>
+									<td colspan="4"><strong>Realizado por:</strong> HECTOR G. </td>
+								</tr>
+								<tr>
+									<td colspan="4"><strong>Confirmado por:</strong> HECTOR G.</td>
+								</tr>
+								<tr style="font-size: 12px;border-bottom: solid 1px;">
+								  <td colspan="4">&nbsp;</td>
+								</tr>
+								
+								
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								<tr>
+									<td colspan="4"><strong>Observacion:</strong></td>
+								</tr>
+								
+								<tr> <td colspan="4">
+- Códigos NMDP, representa una serie de letras que determinan conjuntos específicos de variantes para un determinado grupo alélico, formando así, grupos de posibilidades mínimas para un resultado, siendo considerado de esta manera, un resultado de tipificacion de media resolución.
+
+</td> </tr>
+								<tr> <td colspan="4">- La leyenda de código NMDP, presenta la lista de posibilidades para ese grupo alélico abajo de cada resultado. Ademas podría ser consultada en https://hml.nmdp.org/MacUI/</td> </tr>
+								<tr> <td colspan="4">- Se sugiere solicitar  tipificación HLA confirmatoria al paciente y al potencial donante antes del trasplante.</td> </tr>
+								<tr> <td colspan="4">- No se puede determinar el haplotipo familiar por no contar con las tipificaciones HLA de los padres.</td> </tr>
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								
+								<tr> <td>&nbsp;</td> <td colspan="2" style="font-size: 12px; border-bottom: dashed 1px;">&nbsp;</td> <td>&nbsp;</td> </tr>
+								<tr> <td>&nbsp;</td> <td colspan="2" align="center">Validado electronicamente por: Dra. Sonia Figueredo</td> <td>&nbsp;</td> </tr>
+								<tr> <td>&nbsp;</td> <td colspan="2" align="center">Reg. Nro. 123456 </td> <td>&nbsp;</td> </tr>
+								
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								<tr> <td colspan="4">&nbsp;</td> </tr>
+								
+								
+							</thead>
+							<br>
+						</table>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<footer>
+		  <small>** No valido para procedimiento legal** <br>
+		 Avda. Venezuela c/ Tte. Escurra - Tel.: 292-653</small>
+		</footer>
+	<?php
+	}
+	else
+	{
+		echo '<script type="text/javascript">
+					let timerInterval
+					swal({
+					  title: "No se puede imprimir, Falta validar los resultados!",
+					  html: "",
+					  type: "warning",
+					  timer: 2800,
+					  onOpen: () => {
+						swal.showLoading()
+						timerInterval = setInterval(() => {
+						  swal.getContent().querySelector("strong")
+							.textContent = swal.getTimerLeft()
+						}, 100)
+					  },
+					  onClose: () => {
+						clearInterval(timerInterval);
+						window.close();
+					  }
+					}).then((result) => {
+					  if (
+						// Read more about handling dismissals
+						result.dismiss === swal.DismissReason.timer
+					  ) {
+						console.log("I was closed by the timer")
+					  }
+					})
+				</script>';
+	}
+    ?>
+</body>
+</html>

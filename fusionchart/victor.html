@@ -1,0 +1,73 @@
+<html>
+<head>
+<script type="text/javascript" src="js/fusioncharts.js"></script>
+<script type="text/javascript">
+
+function graficar()
+{
+    // Create a new instance of FusionCharts for rendering inside an HTML
+    // `&lt;div&gt;` element with id `my-chart-container`.
+    var myChart = new FusionCharts({
+        type: 'column3d',
+        renderAt: 'chart-container',
+        width: '400',
+        height: '300',
+		 
+        dataFormat: 'json',
+        dataSource: {
+            chart: {
+                caption: "Prueba PETRICOLA",
+                subCaption: "Los Cinco mejores montos recibidos",
+            },
+            data:[
+			{
+                label: document.getElementById('leyenda1').value,
+                value: document.getElementById('cantidad1').value
+            },
+            {
+                label: document.getElementById('leyenda2').value,
+                value: document.getElementById('cantidad2').value
+            },
+            {
+                label: document.getElementById('leyenda3').value,
+                value: document.getElementById('cantidad3').value
+            },
+            {
+                label: document.getElementById('leyenda4').value,
+                value: document.getElementById('cantidad4').value
+            },
+            {
+                label: document.getElementById('leyenda5').value,
+                value: document.getElementById('cantidad5').value
+            }
+			
+			]
+        }
+    });
+
+    // Render the chart.
+    myChart.render();
+
+};
+
+
+</script>
+</head>
+<body>
+	<input type="button" name="boton" id="boton" value="Graficar" onclick="graficar();" />
+	<input type="hidden" name="leyenda1" id="leyenda1" value="Parte A"/>
+	<input type="hidden" name="leyenda2" id="leyenda2" value="Parte B"/>
+	<input type="hidden" name="leyenda3" id="leyenda3" value="Parte B"/>
+	<input type="hidden" name="leyenda4" id="leyenda4" value="Parte C"/>
+	<input type="hidden" name="leyenda5" id="leyenda5" value="Parte D"/>
+	
+	<input type="hidden" name="cantidad1" id="cantidad1" value="880000"/>
+	<input type="hidden" name="cantidad2" id="cantidad2" value="730000"/>
+	<input type="hidden" name="cantidad3" id="cantidad3" value="590000"/>
+	<input type="hidden" name="cantidad4" id="cantidad4" value="520000"/>
+	<input type="hidden" name="cantidad5" id="cantidad5" value="330000"/>
+	
+    <br/>
+    <div id="chart-container"></div>
+</body>
+</html>

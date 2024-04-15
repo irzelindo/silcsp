@@ -1,0 +1,176 @@
+body, nav, ul, li, a  {margin: 0; padding: 0;font-size: 12px;}
+body {font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+a {text-decoration: none;
+text-decoration-color: #F1F1F1;}
+
+.container {
+    width: 90%;
+    max-width: 960px;
+    margin: 10px auto;
+}
+
+.victor{
+    display:  block;
+}
+
+.victor2{
+    display:  none;
+}
+
+@media (max-width: 480px) {
+  html, body {
+/*    overflow: hidden;*/
+  }
+}
+
+.toggleMenu {
+    display:  none;
+    background: #00008B; 
+    padding: 10px 15px;
+    color: #fff;
+}
+
+.toggleMenu:visited {
+    color: #fff;
+}
+
+.nav {
+    list-style: none;
+     *zoom: 1;
+     background:#00008B;
+}
+.nav:before,
+.nav:after {
+    content: " "; 
+    display: table; 
+}
+
+.nav:after {
+    clear: both;
+}
+.nav ul {
+    list-style: none;
+    width: auto;
+}
+
+.nav a {
+    padding: 10px 15px;
+    color:white;
+    width:auto;
+}
+
+
+.nav li {
+    position: relative;
+}
+.nav > li {
+    float: left;
+    border-top: 1px solid #104336; 
+    width: auto;
+/*    padding-right: 10px;*/
+}
+
+.nav > li > .parent {
+    background-image: url("images/downArrow.png");
+    background-repeat: no-repeat;
+    background-position: 95% 50%;
+}
+.nav > li > a {
+    display: block;
+}
+
+
+.nav li  ul {
+    position: absolute;
+    left: -9999px;
+}
+.nav > li.hover > ul {
+    left: 0;
+}
+.nav li li.hover ul {
+    left: 100%;
+    top: 0;
+
+}
+.nav li li a {
+    display: block;
+    background: #0000CA;
+    position: relative;
+    z-index:100;
+    border-top: 1px solid #175e4c; 
+    width: 160px;  
+}
+
+.nav li a:hover {
+color: yellow;
+text-decoration: none;
+/*font-weight: bold;*/
+}
+
+
+.nav li li a:hover {
+color: yellow;
+text-decoration: none;
+/*font-weight: bold;*/
+}
+
+.nav li li li a {
+    background:#9595FF;
+    z-index:200;
+    border-top: 1px solid #1d7a62;
+}
+
+
+.site-footer {
+  margin-top: 20px;
+  background-color: #200374;
+  color: white;
+  padding: 5px 0;
+}
+.site-footer a {
+  color: white;
+}
+.site-footer span {
+  margin-top: 15px;
+  display: block;
+}
+
+
+@media screen and (max-width: 768px) {
+    .active {
+        display: block;
+        color: white;
+    }
+
+.victor{
+    display:  none;
+}    
+.victor2{
+    display:  block;
+}
+    .nav > li {
+        float: none;
+        width:auto;
+    }
+    .nav > li > .parent {
+        background-position: 95% 50%;
+    }
+    .nav li li .parent {
+        background-image: url("images/downArrow.png");
+        background-repeat: no-repeat;
+        background-position: 95% 50%;
+    }
+    .nav ul {
+        display: block;
+        width: 100%;
+    }
+   .nav > li.hover > ul , .nav li li.hover ul {
+        position: static;
+    }
+
+.nav li li a {
+    width: 100%;  
+}
+
+
+}

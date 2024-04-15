@@ -1,0 +1,1 @@
+C:\Bitnami\wappstack-7.3.9-0\postgresql\bin\pg_dump.exe -h localhost -i -U postgres -F c -b -v -f “C:\Bitnami\wappstack-7.3.9-0\apache2\htdocs\silcsp\basededatos\backup\labcentral.sql” labcentral
